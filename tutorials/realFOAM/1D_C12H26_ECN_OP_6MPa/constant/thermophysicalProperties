@@ -1,0 +1,72 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2112                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+thermoType
+{
+    type            hePsiThermo;
+    mixture         pureMixture;
+    transport       polynomial;
+    thermo          janaf;
+    equationOfState PengRobinsonGas;
+    specie          specie;
+    energy          sensibleEnthalpy;
+}
+
+mixture
+{
+        specie
+        {
+             molWeight    1.70334840E+02;
+        }
+        equationOfState
+        {
+             Tc           6.58100000E+02;
+             Pc           1.81700000E+06;
+             Vc           7.51879699E+02;
+             omega        5.74182221E-01;
+        }
+        thermodynamics
+        {
+             Tlow         50;
+             Thigh        5000;
+             Tcommon      1000;
+             highCpCoeffs (
+                           3.70187925E+01
+                           5.54721488E-02
+                           -1.92079548E-05
+                           3.08175574E-09
+                           -1.84800617E-13
+                           -5.26984458E+04
+                           -1.61453501E+02
+             );
+             lowCpCoeffs (
+                           2.13264480E+01
+                           -3.86394002E-02
+                           3.99476113E-04
+                           -5.06681097E-07
+                           2.00697878E-10
+                           -4.22475053E+04
+                           -4.85848300E+01
+             );
+        }
+        transport
+        {
+             muCoeffs<8>     ( 1000 -0.05 0.003 0 0 0 0 0 );
+             kappaCoeffs<8>  ( 2000 -0.15 0.023 0 0 0 0 0 );
+        }
+}
+
+// ************************************************************************* //

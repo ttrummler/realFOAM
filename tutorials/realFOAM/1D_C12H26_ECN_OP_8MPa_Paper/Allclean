@@ -1,0 +1,22 @@
+#!/bin/sh
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+# Delete time folders
+rm -r 0 1e-07
+
+# Delete log files
+rm ./log.*
+
+# Delete postProcessing folder
+rm -r ./postProcessing
+
+# Delete mesh
+rm ./constant/polyMesh/points
+rm ./constant/polyMesh/neighbour
+rm ./constant/polyMesh/faces
+rm ./constant/polyMesh/boundary
+rm ./constant/polyMesh/owner
+
+# Delete simData and simPlots in validation data
+rm -r ./plots
+rm -r ./validation/simData

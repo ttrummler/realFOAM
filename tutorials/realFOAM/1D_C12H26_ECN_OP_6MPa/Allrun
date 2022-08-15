@@ -1,0 +1,74 @@
+#!/bin/bash
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+cp -rf 0_orig 0
+
+# Create Mesh
+runApplication blockMesh
+
+########################################
+# Run Application with PengRobinson EoS#
+########################################
+
+# Run solver
+runApplication rhoPimpleFoam
+
+# Extract data
+runApplication postProcess -func sampleDict -latestTime
+
+# Copy result to validation folder and insert header
+mkdir ./validation/simData
+cp ./postProcessing/sampleDict/1e-07/line* ./validation/simData/PengRobinson.txt
+sed -i '1 i\x\tT\trho' ./validation/simData/PengRobinson.txt
+mv log.rhoPimpleFoam log.rhoPimpleFoamPengRobinson
+mv log.postProcess log.postProcessPengRobinson
+
+#############################################
+# Run Application with SoaveRedlichKwong EoS#
+#############################################
+
+# Replace EoS in thermophysicalProperties
+sed -i 's/PengRobinson/SoaveRedlichKwong/g' ./constant/thermophysicalProperties
+
+# Run solver
+runApplication rhoPimpleFoam
+
+# Extract data
+runApplication postProcess -func sampleDict -latestTime
+
+# Copy result to validation folder and insert header
+cp ./postProcessing/sampleDict/1e-07/line* ./validation/simData/SoaveRedlichKwong.txt
+sed -i '1 i\x\tT\trho' ./validation/simData/SoaveRedlichKwong.txt
+mv log.rhoPimpleFoam log.rhoPimpleFoamSoaveRedlichKwong
+mv log.postProcess log.postProcessSoaveRedlichKwong
+
+#############################################
+# Run Application with RedlichKwongPengRobinson EoS#
+#############################################
+
+# Replace EoS in thermophysicalProperties
+sed -i 's/SoaveRedlichKwong/RedlichKwongPengRobinson/g' ./constant/thermophysicalProperties
+
+# Run solver
+runApplication rhoPimpleFoam
+
+# Extract data
+runApplication postProcess -func sampleDict -latestTime
+
+# Copy result to validation folder and insert header
+cp ./postProcessing/sampleDict/1e-07/line* ./validation/simData/RedlichKwongPengRobinson.txt
+sed -i '1 i\x\tT\trho' ./validation/simData/RedlichKwongPengRobinson.txt
+mv log.rhoPimpleFoam log.rhoPimpleFoamRedlichKwongPengRobinson
+mv log.postProcess log.postProcessRedlichKwongPengRobinson
+
+# Set back to standard
+sed -i 's/RedlichKwongPengRobinson/PengRobinson/g' ./constant/thermophysicalProperties
+
+###############
+#Create Plots#
+###############
+
+cd ./validation/gnuPlots/
+gnuplot Plot.gnu
+mkdir ../../plots
+mv ./Density.png ../../plots
