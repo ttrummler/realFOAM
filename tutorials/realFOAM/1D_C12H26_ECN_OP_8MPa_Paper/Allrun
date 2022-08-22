@@ -1,0 +1,68 @@
+#!/bin/bash
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+cp -rf 0_orig 0
+
+# Create Mesh
+runApplication blockMesh
+
+########################################
+# Run Application with PengRobinson EoS#
+########################################
+
+
+# Run solver
+runApplication rhoPimpleFoam
+
+# Copy result to validation folder and insert header
+if [[ -d "validation/simData" ]]
+then
+    echo "validation/simData exists."
+    rm -r .validation/simData
+fi
+mkdir ./validation/simData
+cp ./postProcessing/graphCell/1e-07/line* ./validation/simData/PengRobinson.txt
+sed -i '1 i\x\tT\trho' ./validation/simData/PengRobinson.txt
+mv log.rhoPimpleFoam log.rhoPimpleFoamPengRobinson
+
+#############################################
+# Run Application with SoaveRedlichKwong EoS#
+#############################################
+
+# Replace EoS in thermophysicalProperties
+sed -i 's/PengRobinson/SoaveRedlichKwong/g' ./constant/thermophysicalProperties
+
+# Run solver
+runApplication rhoPimpleFoam
+
+# Copy result to validation folder and insert header
+cp ./postProcessing/graphCell/1e-07/line* ./validation/simData/SoaveRedlichKwong.txt
+sed -i '1 i\x\tT\trho' ./validation/simData/SoaveRedlichKwong.txt
+mv log.rhoPimpleFoam log.rhoPimpleFoamSoaveRedlichKwong
+
+#############################################
+# Run Application with RedlichKwondPengRobinson EoS#
+#############################################
+
+# Replace EoS in thermophysicalProperties
+sed -i 's/SoaveRedlichKwong/RedlichKwongPengRobinson/g' ./constant/thermophysicalProperties
+
+# Run solver
+runApplication rhoPimpleFoam
+
+# Copy result to validation folder and insert header
+cp ./postProcessing/graphCell/1e-07/line* ./validation/simData/RedlichKwongPengRobinson.txt
+sed -i '1 i\x\tT\trho' ./validation/simData/RedlichKwongPengRobinson.txt
+mv log.rhoPimpleFoam log.rhoPimpleFoamRedlichKwongPengRobinson
+
+# Set back to standard
+sed -i 's/RedlichKwongPengRobinson/PengRobinson/g' ./constant/thermophysicalProperties
+
+###############
+#Create Plots#
+###############
+
+cd ./validation/gnuPlots/
+gnuplot Plot.gnu
+mkdir ../../plots
+mv ./Density.png ../../plots
